@@ -1,0 +1,304 @@
+
+
+*{
+  box-sizing: border-box;
+}
+html, body {
+  height: 100%;
+}
+
+body, h1, h2, ul, li, button, pre{
+  padding: 0;
+  margin: 0;
+}
+body {
+  background-color: #ddd;
+}
+
+.h-nav-ctrler{
+  max-width: 768px;
+  margin: 0 auto; 
+}
+h1{
+  font-size: 2em;
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+h2{
+  font-size: 1.5em;
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+body{
+  font-size: 16px;
+}
+input {
+  line-height: normal;
+}
+div:focus{
+  outline: none;
+}
+ul {
+  list-style: none;
+}
+form{
+  display: block;
+}
+.root{
+  min-height: 100vh;
+}
+.page{
+  min-height: 200vh;
+  background-image: linear-gradient(#eee, #999, #eee, #999);
+}
+a{
+  text-decoration: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.wrap{
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+.bottom_bar{
+  height: 50px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #ccc;
+  border-top: 1px solid #fff;
+  display: flex;
+}
+a.bottom_bar_item{
+  width: 50%;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 49px;
+  color: #333;
+}
+a.bottom_bar_item.router-link-exact-active{
+  color: #00008B;
+  font-weight: bold;
+}
+.index_to_list{
+  padding-top: 150px;
+  text-align: center;
+  display: block;
+}
+
+.item{
+  display: flex;
+  align-items: center;
+  height: 35px;
+  justify-content: space-around;
+  padding: 0 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  line-height: 1;
+}
+.item_active{
+  background-color: #ddd;
+}
+
+
+
+body{
+  font-size: 16px;
+}
+
+.index_page{
+  min-height: 100vh;
+}
+
+.index_logo{
+  width: 2em;
+  height: 2em;
+  display: block;
+}
+.index_page h1, .index_page h2 {
+  text-align: center;
+}
+.index_desc{
+  color: #999;
+  margin-top: 0;
+}
+.nav{
+
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding-top: 8px;
+}
+.nav a {
+  margin: 0 1em;
+}
+.nav .gitgub{
+  width: 30px;
+  height: 30px;
+}
+
+.index_page h2 b{
+  color: #000;
+}
+
+a {
+  cursor: pointer;
+}
+.h-nav-active{
+  opacity: 1;
+}
+.api_nav.h-nav-active{
+  color: #000;
+  font-weight: bold;
+}
+
+
+
+
+
+.index_table_wrap{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.index_table{
+  border-collapse: collapse;
+  border-color: #ccc;
+  border: 0;
+}
+
+.index_table th{
+  background-color: #eee;
+}
+
+.index_table th, .index_table td{
+  padding: 3px 12px;
+}
+
+td.index_table_f{
+  padding-right: 45px;
+  font-weight: bold;
+}
+
+.index_table i{
+  color: #999;
+}
+
+
+.index_diff_loading{
+  cursor: auto;
+}
+
+.index_diff_loading::before {
+  padding:0;
+  margin:0;
+  position: absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  left:0;
+  margin:auto;
+  height: 13px;
+  width: 13px;
+  animation: rotate 0.8s infinite linear;
+  border: 3px solid #999;
+  border-right-color: #fff;
+  border-radius: 50%;
+}
+
+.index_diff_loading::before{
+  content: '';
+}
+
+@keyframes rotate { 
+  0%    { transform: rotate(0deg); }
+  100%  { transform: rotate(360deg); }
+}
+
+.index_diff_loading_more .index_diff_loading::before{
+  width: 9px;
+  height: 9px;
+  border-width: 2px;
+}
+.index_diff_start_link{
+  text-decoration: underline;
+  padding: 3px 10px;
+  border-radius: 5px;
+  color: #333;
+}
+
+.index_diff_list_item_active, 
+.index_diff_page_back_active, 
+.index_diff_start_active{
+  transition: all .15s;
+  background-color: #aaa;
+  color: #fff;
+}
+.index_diff_start_active{
+  text-decoration: none;
+}
+.index_codepen_wrap{
+  width: 980px;
+  margin: 0 auto;
+  height: 565px;
+}
+
+footer{
+  padding: 25px 0px;
+  line-height: 1.7em;
+  background-color: #eee;
+  text-align: center;
+  font-size: 14px;
+}
+
+.index_get_start{
+  text-align: center;
+  font-size: 30px;
+  margin-top: 20px;
+  padding-bottom: 50px;
+}
+
+.api_wrap h1{
+  text-align: center;
+}
+
+.red{
+  height: 100px;
+  width: 100px;
+  
+}
+
+.index_icon{
+  background-image: url('https://www.w3school.com.cn/ui2017/compatible_firefox.png');
+}
+.h-nav-actived > .index_icon{
+  background-image: url('https://www.w3school.com.cn/ui2017/compatible_ie.png');
+}
+
+
+/* .h-nav-tab-page  {
+  top: 48px;
+}
+.h-nav-tabbar {
+  top: 0;
+  bottom: initial;
+  border-top: 0;
+  border-bottom: 1px solid #c7c7c7;
+} */
+
+
+/* .h-nav-tabs-wrap{
+  padding-bottom: 0;
+  padding-top: 48px;
+}
+.h-nav-tabbar{
+  top: 0;
+  bottom: initial;
+  border-top: 0;
+  border-bottom: 1px solid #c7c7c7;
+} */
