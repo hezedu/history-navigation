@@ -1,5 +1,7 @@
 interface  HistoryNavigation {
   push: (userUrl: UserUrl) => void;
+  relaunch: (userUrl: UserUrl) => void;
+  switchTab: (userUrl: UserUrl) => void;
 }
 
 export type Tabs = Array<string>;

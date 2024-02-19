@@ -172,7 +172,18 @@ class HistoryNav {
       isPop: false
     });
   }
-
+  relaunch(userUrl: UserUrl){
+    const route = fullUrlParse(userUrl);
+    this.backToStartAndReplace(route, 'relaunch');
+  }
+  switchTab(userUrl: UserUrl){
+    const route = fullUrlParse(userUrl);
+    if(!this.isTabRoute(route.trimedPath)){
+      console.error(userUrl, ' is not tab url');
+      return;
+    }
+    this.backToStartAndReplace(route, 'switchtab');
+  }
   _clearAll(){
     if(this.tabStackMap){
       this.clearTabStack();

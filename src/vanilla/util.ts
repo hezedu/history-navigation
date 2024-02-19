@@ -20,8 +20,8 @@ export function _formatPages(pages: Pages): PageHashMap{
 }
 
 export function _formatTabBar(tabBar: TabBar, pageMap: PageHashMap){
-
-  const len = tabBar.length;
+  const list = tabBar.list;
+  const len = list.length;
   if(len < 2){
     throw new Error(`tabBar list length must >= 2`);
   }
@@ -30,13 +30,13 @@ export function _formatTabBar(tabBar: TabBar, pageMap: PageHashMap){
   const _set:Set<string> = new Set;
   // const list:TabBar = [];
   for(; i < len; i++){
-    item = tabBar[i];
-    tk = trimSlash(item);
+    item = list[i];
+    tk = trimSlash(item.path);
     let page;
     if(pageMap.hasOwnProperty(tk)){
       page = pageMap[tk];
     }
-    if(!page || page.path !== item){
+    if(!page || page.path !== item.path){
       throw new Error(`tabBar pagePath: ${i} is not found in pages`);
     }
     if(_set.has(tk)){

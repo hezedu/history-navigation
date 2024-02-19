@@ -1,36 +1,7 @@
 import HistoryNav from '../lib/history';
 import type { StackItem, HistoryNavigation } from '../lib/history-navigation';
 import { _formatPages } from './util';
-const pages = [
-  {path: '/', component: {
-    onCreate(opt: StackItem, hNv: HistoryNavigation){
-      const div = document.createElement('div');
-      const el = document.createElement('h1');
-      el.textContent = 'hello ' + opt.route.path;
-      div.append(el);
-      const btn = document.createElement('button');
-      btn.textContent = 'push to list';
-      btn.addEventListener('click', () => {
-        hNv.push('/list');
-      });
-      div.append(btn);
-      return div;
-    },
-    onBeforeDestory(){
-      console.log('index onBeforeDestory');
-    }
-  }},
-  {path: '/list', component: {
-    onCreate(opt: StackItem){
-      const el = document.createElement('h1');
-      el.textContent = 'hello ' + opt.route.path;
-      return el;
-    },
-    onBeforeDestory(){
-      console.log('list onBeforeDestory');
-    }
-  }},
-]
+import type { PageHashMap, Config } from './vanilla-type';
 
 const defNotFoundPage = {
   onCreate: () => {
@@ -42,16 +13,16 @@ const defNotFoundPage = {
   activated:  () => {},
   deactivated:  () => {},
 }
-const pageMap = _formatPages(pages);
-function getPageCmpt(trimedPath: string){
+
+function getPageCmpt(pageMap: PageHashMap, trimedPath: string){
   if(pageMap.hasOwnProperty(trimedPath)){
     return pageMap[trimedPath].component;
   }
   return defNotFoundPage;
 }
-export default function Main() {
+export default function Main(config: Config) {
   const container = genContainer();
-
+  const pageMap = _formatPages(config.pages);
   Object.assign(container.style, {
     height: '100%',
     width: '100%',
@@ -59,27 +30,29 @@ export default function Main() {
     position: 'relative'
   });
   const hNv = new HistoryNav({
-    isHashMode: true,
+    isHashMode: config.isHashMode,
+    base: config.base,
     onStackItemSet(opt: StackItem) {
       const pageContainer = genPageWrap(opt.stateKey);
-      const pageCmpt = getPageCmpt(opt.route.trimedPath);
+      const pageCmpt = getPageCmpt(pageMap, opt.route.trimedPath);
       const page = pageCmpt.onCreate(opt, hNv);
       pageContainer.append(page);
       container.append(pageContainer);
     },
-    onRouted(){
-
+    onRouted({route}){
+      document.title = route.path;
     },
+    tabs: ['/', '/list', '/me'],
     onStackItemDel(opt: StackItem){
       const pageWrap = document.getElementById('_h_n_page_' + opt.stateKey);
       if(pageWrap){
-        const pageCmpt = getPageCmpt(opt.route.trimedPath);
+        const pageCmpt = getPageCmpt(pageMap, opt.route.trimedPath);
         pageCmpt.onBeforeDestory();
         pageWrap.remove();
       }
     }
   })
-  hNv.load('/');
+  hNv.load();
   return container;
 }
 
@@ -95,20 +68,6 @@ function genContainer (){
   return el;
 }
 
-// function genHandle (){
-//   const el = document.createElement('div');
-//   Object.assign(el.style, {
-//     height: 0,
-//     width: 0,
-//     border: 0,
-//     margin: 0,
-//     padding: 0,
-//     boxShadow: 'none',
-//     outline: 'none',
-//     position: 'static'
-//   });
-//   return el;
-// }
 
 function genPageWrap (stateKey: number){
   const el = document.createElement('div');
