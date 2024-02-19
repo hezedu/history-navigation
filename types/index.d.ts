@@ -1,10 +1,17 @@
+interface  HistoryNavigation {
+
+  push: (userUrl: UserUrl) => void;
+}
 type OnCreateParams = {
   route: Route,
   meta: PageMeta,
   stateKey: number
 }
 type Component = {
-  onCreate: (OnCreateParams) => HTMLElement,
+  // onCreate: (OnCreateParams) => HTMLElement,
+  
+  onCreate: (item: PageStackItem, hNv: HistoryNavigation) => HTMLElement,
+  onBeforeDestory: () => void,
   // onDestory: Function,
   // onModalCreate?: Function,
   // onModealDestory?: Function,
@@ -44,12 +51,15 @@ export type PageHashMap = {
   [key: string]: PageItem
 }
 
-// type PageStackItem = PageItem & {
-//   stackId: number
-// }
-export type PageStackHashMap = {
-  [key: number]: PageItem
+type PageStackItem = {
+  stateKey: number,
+  route: Route,
+  isTab: boolean,
+  tabIndex?: number
 }
+export type StackMap = {
+  [key: string]: PageStackItem
+};
 
 export type QueryObj = {
   [key: string]: string
@@ -67,22 +77,27 @@ type StateSetParams = {
   route: Route,
   stateKey: number
 }
-export type OnStackItemSet = Function<StateSetParams>;
+export type OnStackItemSet = (item: PageStackItem) => void;
+export type OnRoutedEvent = {
+  route: Route,
+  behavior: string,
+  distance: number,
+  isPop: boolean
+}
+export type OnRouted = (e: OnRoutedEvent) => void;
 export type HistoryNavOpt = {
   isHashMode?: boolean,
   base?: string,
   tabs?: TabBar,
-  routed?: OnStackItemSet,
+  onRouted: OnRouted,
   onStackItemSet: OnStackItemSet,
-  onStackItemDestory?: OnStackItemSet
+  onStackItemDel: OnStackItemSet
 }
 type PageStackItem = {
   route: Route,
   page: Page
 }
-export type HistoryNavStacksHashMap = {
-  [key: number]: route
-}
+
 
 export type HistoryState = {
   key: number,
@@ -90,10 +105,10 @@ export type HistoryState = {
 }
 
 export type ModalCrumbs = Array<[number, number]>;
-
+export type HistoryNavigationMethod = 'push' | 'replace' | '_replace';
 export type WhenBackPopInfo = {
-  method: string,
-  args: IArguments
+  route: Route,
+  behavior: string
 }
 
 export type Behavior = {

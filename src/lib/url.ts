@@ -104,10 +104,10 @@ export function urlParse(url: string): UrlParseResult{
     query: queryParse(qsString)
   }
 }
-
+export type UserUrl = string | UrlParseResult;
 
 /* path, fullPath, trimedPath, query */
-export function fullUrlParse(userUrl: string | UrlParseResult): Route{
+export function fullUrlParse(userUrl: UserUrl): Route{
   let route, fullPath, trimedPath;
   if(typeof userUrl === 'string'){
     route = urlParse(userUrl);

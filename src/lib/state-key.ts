@@ -1,14 +1,16 @@
 
-import { KEY_NAME, MODAL_KEY_NAME } from './constant';
 import type { HistoryState } from '../../types/index';
 const h = window.history;
+export const STATE_START_KEY = 0;
+export const KEY_NAME = '_h_n_k';
+export const MODAL_KEY_NAME = '_h_n_modal_k';
 
 export function getCurrentStateKey () {
   const state = h.state;
   if (state && typeof state[KEY_NAME] === 'number') {
     return state[KEY_NAME];
   }
-  return 1;
+  return STATE_START_KEY;
 }
 
 export function getCurrModaKey(){
