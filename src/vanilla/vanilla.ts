@@ -1,9 +1,9 @@
-import HistoryNav from './history';
-import { PageStackItem, HistoryNavigation } from '../../types/index';
+import HistoryNav from '../lib/history';
+import type { StackItem, HistoryNavigation } from '../lib/history-navigation';
 import { _formatPages } from './util';
 const pages = [
   {path: '/', component: {
-    onCreate(opt: PageStackItem, hNv: HistoryNavigation){
+    onCreate(opt: StackItem, hNv: HistoryNavigation){
       const div = document.createElement('div');
       const el = document.createElement('h1');
       el.textContent = 'hello ' + opt.route.path;
@@ -21,7 +21,7 @@ const pages = [
     }
   }},
   {path: '/list', component: {
-    onCreate(opt: PageStackItem){
+    onCreate(opt: StackItem){
       const el = document.createElement('h1');
       el.textContent = 'hello ' + opt.route.path;
       return el;
@@ -60,7 +60,7 @@ export default function Main() {
   });
   const hNv = new HistoryNav({
     isHashMode: true,
-    onStackItemSet(opt: PageStackItem) {
+    onStackItemSet(opt: StackItem) {
       const pageContainer = genPageWrap(opt.stateKey);
       const pageCmpt = getPageCmpt(opt.route.trimedPath);
       const page = pageCmpt.onCreate(opt, hNv);
@@ -70,7 +70,7 @@ export default function Main() {
     onRouted(){
 
     },
-    onStackItemDel(opt: PageStackItem){
+    onStackItemDel(opt: StackItem){
       const pageWrap = document.getElementById('_h_n_page_' + opt.stateKey);
       if(pageWrap){
         const pageCmpt = getPageCmpt(opt.route.trimedPath);
@@ -80,10 +80,7 @@ export default function Main() {
     }
   })
   hNv.load('/');
-
-
   return container;
-
 }
 
 

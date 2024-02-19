@@ -1,47 +1,17 @@
 interface  HistoryNavigation {
-
   push: (userUrl: UserUrl) => void;
 }
 
-type Component = {
-  // onCreate: (OnCreateParams) => HTMLElement,
-  
-  onCreate: (item: PageStackItem, hNv: HistoryNavigation) => HTMLElement,
-  onBeforeDestory: () => void,
-  // onDestory: Function,
-  // onModalCreate?: Function,
-  // onModealDestory?: Function,
-  // activated?: Function,
-  // deactivated?: Function
-}
-type PageMeta = {
-  [key: string]: any
-}
+export type Tabs = Array<string>;
 
-
-
-
-
-export type Config = {
-  isHashMode?: boolean,
-  base?: string,
-  pageBg?: string,
-  pageClassName?: string,
-  pages: Pages,
-  notFoundPage?: Component,
-  tabBar?: TabBar,
-}
-
-
-
-type PageStackItem = {
+type StackItem = {
   stateKey: number,
   route: Route,
   isTab: boolean,
   tabIndex?: number
 }
 export type StackMap = {
-  [key: string]: PageStackItem
+  [key: string]: StackItem
 };
 
 export type QueryObj = {
@@ -60,25 +30,25 @@ type StateSetParams = {
   route: Route,
   stateKey: number
 }
-export type OnStackItemSet = (item: PageStackItem) => void;
+
+export type OnStackItemSet = (item: StackItem) => void;
+
 export type OnRoutedEvent = {
   route: Route,
   behavior: string,
   distance: number,
   isPop: boolean
 }
+
 export type OnRouted = (e: OnRoutedEvent) => void;
+
 export type HistoryNavOpt = {
   isHashMode?: boolean,
   base?: string,
-  tabs?: TabBar,
+  tabs?: Tabs,
   onRouted: OnRouted,
   onStackItemSet: OnStackItemSet,
   onStackItemDel: OnStackItemSet
-}
-type PageStackItem = {
-  route: Route,
-  page: Page
 }
 
 
@@ -92,10 +62,4 @@ export type ModalCrumbs = Array<[number, number]>;
 export type WhenBackPopInfo = {
   route: Route,
   behavior: string
-}
-
-export type Behavior = {
-  type: string,
-  distance: number,
-  isPop: boolean
 }

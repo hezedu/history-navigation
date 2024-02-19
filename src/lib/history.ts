@@ -1,23 +1,13 @@
-import type { Config, PageHashMap, Component,  HistoryNavigationMethod, Route, ModalCrumbs,PageStackItem,
-  StackMap,  HistoryState, WhenBackPopInfo, Behavior, HistoryNavOpt, OnRouted, 
-  OnStackItemSet } from '../../types/index';
-import { _formatPages, _formatTabs, getTotalSteps } from './util';
+import type {  Route, ModalCrumbs, StackItem, StackMap,  HistoryState, WhenBackPopInfo, HistoryNavOpt, OnRouted, OnStackItemSet } from './history-navigation';
+
+import { STATE_START_KEY,  KEY_NAME, getCurrentStateKey, getCurrState, getCurrModaKey, getPreState, updatePreState, genStateKey } from './state-key';
+import { formatTabs, getTotalSteps } from './util';
 import URL, { fullUrlParse } from './url';
 import type { UserUrl } from './url';
-import {STATE_START_KEY, 
-        KEY_NAME,
-        getCurrentStateKey, 
-        getCurrState, 
-        getCurrModaKey, 
-        getPreState,  
-        updatePreState, 
-        genStateKey
-      } from './state-key';
-
-
-let isInit = false;
 
 const h = window.history;
+
+let isInit = false;
 
 class HistoryNav {
   _isOmitForwardEvent = false;
@@ -28,11 +18,6 @@ class HistoryNav {
   tabStackMap?: StackMap;
   urlUtils: URL;
   modalCrumbs: ModalCrumbs = [];
-  behavior: Behavior = {
-    type: '',
-    distance: 0,
-    isPop: false
-  }
   onStackItemSet: OnStackItemSet;
   onStackItemDel: OnStackItemSet;
   onRouted: OnRouted;
@@ -45,7 +30,7 @@ class HistoryNav {
     }
     isInit = true;
     if(opts.tabs){
-      this.tabMap = _formatTabs(opts.tabs);
+      this.tabMap = formatTabs(opts.tabs);
       this.tabStackMap = {};
     }
     this.urlUtils = new URL(opts.isHashMode, opts.base);
@@ -224,7 +209,7 @@ class HistoryNav {
       }
     }
   }
-  _delPageStackItem(hashMap: StackMap, stateKey: string | number, item: PageStackItem){
+  _delPageStackItem(hashMap: StackMap, stateKey: string | number, item: StackItem){
     delete(hashMap[stateKey]);
     this.onStackItemDel(item);
   }
@@ -235,7 +220,7 @@ class HistoryNav {
     }
   }
   setPageStackItem(stateKey: number, route: Route){
-    let item: PageStackItem = {
+    let item: StackItem = {
       route,
       stateKey,
       isTab: false
@@ -329,20 +314,7 @@ class HistoryNav {
     if(preKey === currKey) {
       return;
     }
-  
-    // if(preKey === currKey){
-    //   const modalKey = getCurrModaKey();
-    //   const preModalKey = this.getLastModalKeyByCrumbs(preKey);
-    //   if(modalKey > preModalKey){
-    //     this._isOmitForwardEvent = true;
-    //     this.back(modalKey - preModalKey);
-    //     return;
-    //   }
-    //   this.removeModal();
-    //   // this._set2ModalCrumbsWhenChange();
-    //   return;
-    // }
-  
+
     const compare = currKey - preKey;
   
     // let backTra = this._whenPopTra;
