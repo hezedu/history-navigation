@@ -1,6 +1,7 @@
 
 import type { Pages, PageHashMap, TabBar} from './vanilla-type';
 import { trimSlash } from '../lib/url';
+export function noop() {};
 export function _formatPages(pages: Pages): PageHashMap{
   let map: PageHashMap = {};
   let i = 0, len = pages.length, page, tk;

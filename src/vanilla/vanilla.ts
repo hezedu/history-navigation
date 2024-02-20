@@ -1,6 +1,6 @@
 import HistoryNav from '../lib/history';
 import type { StackItem, HistoryNavigation } from '../lib/history-navigation';
-import { _formatPages } from './util';
+import { _formatPages, noop } from './util';
 import type { PageHashMap, Config } from './vanilla-type';
 
 const defNotFoundPage = {
@@ -29,27 +29,30 @@ export default function Main(config: Config) {
     overflow: 'hidden',
     position: 'relative'
   });
+  const onRouted = config.onRouted;
   const hNv = new HistoryNav({
     isHashMode: config.isHashMode,
     base: config.base,
-    onStackItemSet(opt: StackItem) {
-      const pageContainer = genPageWrap(opt.stateKey);
-      const pageCmpt = getPageCmpt(pageMap, opt.route.trimedPath);
-      const page = pageCmpt.onCreate(opt, hNv);
-      pageContainer.append(page);
+    onStackItemSet(item: StackItem) {
+      const pageContainer = genPageWrap(item.stateKey);
+      const pageCmpt = getPageCmpt(pageMap, item.route.trimedPath);
+      item.cmpt = pageCmpt(item, pageContainer, hNv);
+      item.pageContainer = pageContainer;
+      // pageContainer.append(page);
       container.append(pageContainer);
     },
-    onRouted({route}){
-      document.title = route.path;
+    onRouted(arg){
+      if(onRouted){
+        const route = arg.route;
+        const page = pageMap[route.trimedPath];
+        onRouted(arg, page);
+      }
     },
     tabs: ['/', '/list', '/me'],
-    onStackItemDel(opt: StackItem){
-      const pageWrap = document.getElementById('_h_n_page_' + opt.stateKey);
-      if(pageWrap){
-        const pageCmpt = getPageCmpt(pageMap, opt.route.trimedPath);
-        pageCmpt.onBeforeDestory();
-        pageWrap.remove();
-      }
+    onStackItemDel(item: StackItem){
+ 
+      item.cmpt.beforeDestory();
+      item.pageContainer.remove();
     }
   })
   hNv.load();

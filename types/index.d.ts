@@ -3,17 +3,6 @@ interface  HistoryNavigation {
   push: (userUrl: UserUrl) => void;
 }
 
-type Component = {
-  // onCreate: (OnCreateParams) => HTMLElement,
-  
-  onCreate: (item: PageStackItem, hNv: HistoryNavigation) => HTMLElement,
-  onBeforeDestory: () => void,
-  // onDestory: Function,
-  // onModalCreate?: Function,
-  // onModealDestory?: Function,
-  // activated?: Function,
-  // deactivated?: Function
-}
 type PageMeta = {
   [key: string]: any
 }

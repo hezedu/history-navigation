@@ -36,4 +36,5 @@ export type Config = {
   pages: Pages,
   notFoundPage?: Component,
   tabBar?: TabBar,
+  onRouted?: Function
 }

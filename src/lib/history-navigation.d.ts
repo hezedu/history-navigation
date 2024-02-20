@@ -10,7 +10,8 @@ type StackItem = {
   stateKey: number,
   route: Route,
   isTab: boolean,
-  tabIndex?: number
+  tabIndex?: number,
+  [key: string]: any
 }
 export type StackMap = {
   [key: string]: StackItem
@@ -39,7 +40,8 @@ export type OnRoutedEvent = {
   route: Route,
   behavior: string,
   distance: number,
-  isPop: boolean
+  isPop: boolean,
+  [key: string]: any
 }
 
 export type OnRouted = (e: OnRoutedEvent) => void;
