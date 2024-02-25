@@ -1,5 +1,5 @@
 
-import type { Pages, PageHashMap, TabBar} from './vanilla-type';
+import type { Pages, PageHashMap, TabBarList} from './vanilla-type';
 import { trimSlash } from '../lib/url';
 export function noop() {};
 export function _formatPages(pages: Pages): PageHashMap{
@@ -20,8 +20,7 @@ export function _formatPages(pages: Pages): PageHashMap{
   return map;
 }
 
-export function _formatTabBar(tabBar: TabBar, pageMap: PageHashMap){
-  const list = tabBar.list;
+export function formatTabBarList(list: TabBarList, pageMap: PageHashMap){
   const len = list.length;
   if(len < 2){
     throw new Error(`tabBar list length must >= 2`);
@@ -44,7 +43,7 @@ export function _formatTabBar(tabBar: TabBar, pageMap: PageHashMap){
       throw new Error(`tabBar pagePath: ${tk} is same as ${i}`);
     }
     page.isTab = true;
-    // page.tabIndex = i;
+    page.tabIndex = i;
     _set.add(tk);
     // list.push(tk);
   }

@@ -15,11 +15,16 @@ class HistoryNav {
 
   stackMap: StackMap = {};
   tabMap?: Map<string, number>;
-  tabStackMap?: StackMap;
   urlUtils: URL;
   modalCrumbs: ModalCrumbs = [];
   onStackItemSet: OnStackItemSet;
   onStackItemDel: OnStackItemSet;
+  onStackItemActivated: OnStackItemSet;
+  onStackItemDeactivated: OnStackItemSet;
+  onStackTabItemSet?: OnStackItemSet;
+  onStackTabItemDel?: OnStackItemSet;
+  onStackTabItemActivated?: OnStackItemSet;
+  onStackTabItemDeactivated?: OnStackItemSet;
   onRouted: OnRouted;
   _handleWindowUnload: () => void;
   _handlePopstate: () => void;
@@ -31,11 +36,17 @@ class HistoryNav {
     isInit = true;
     if(opts.tabs){
       this.tabMap = formatTabs(opts.tabs);
-      this.tabStackMap = {};
+      this.onStackTabItemSet = opts.onStackTabItemSet;
+      this.onStackTabItemDel = opts.onStackTabItemDel;
+      this.onStackTabItemActivated = opts.onStackTabItemActivated;
+      this.onStackTabItemDeactivated = opts.onStackTabItemDeactivated;
     }
     this.urlUtils = new URL(opts.isHashMode, opts.base);
     this.onStackItemSet = opts.onStackItemSet;
     this.onStackItemDel = opts.onStackItemDel;
+    this.onStackItemActivated = opts.onStackItemActivated;
+    this.onStackItemDeactivated = opts.onStackItemDeactivated;
+
     this.onRouted = opts.onRouted;
     this._handleWindowUnload = () => {
       this.handleWindowUnload();
@@ -141,7 +152,32 @@ class HistoryNav {
    if(behavior === 'relaunch'){
       this._clearAll();
     } else {
-      this._clearAfter();
+ 
+      if(distance !== 0){
+        this._clearAfter();
+      }
+      // const currItem = this.stackMap[key];
+      // if(currItem){
+        
+      // }
+      if(behavior === 'switchTab'){
+        if(key === STATE_START_KEY){
+          const item = this.stackMap[key];
+          if(item){
+            let _tabSMap = <StackMap>item.tabStackMap;
+            let _tabIndex = <number>item.tabIndex;
+            if(_tabSMap.hasOwnProperty(_tabIndex)){
+              let tab = _tabSMap[_tabIndex];
+              if(tab){
+                (this.onStackTabItemDeactivated as OnStackItemSet)(tab);
+              }
+            }
+            // console.log('_tabSMap', _tabSMap,  _tabIndex);
+          
+          }
+        }
+      }
+      
     }
     this.setPageStackItem(key, route);
     this.onRouted({
@@ -161,6 +197,8 @@ class HistoryNav {
   }
   _push(route: Route){
     const key = genStateKey();
+    const preItem = <StackItem>this.stackMap[getCurrentStateKey()];
+    this.onStackItemDeactivated(preItem);
     // this._setModalCrumbsWhenChange();
     h.pushState({[KEY_NAME]: key}, '', this.urlUtils.toLocationUrl(route.fullPath));
     updatePreState();
@@ -182,10 +220,10 @@ class HistoryNav {
       console.error(userUrl, ' is not tab url');
       return;
     }
-    this.backToStartAndReplace(route, 'switchtab');
+    this.backToStartAndReplace(route, 'switchTab');
   }
   _clearAll(){
-    if(this.tabStackMap){
+    if(this.tabMap){
       this.clearTabStack();
     }
     this.clearStack();
@@ -204,15 +242,23 @@ class HistoryNav {
     }
   }
   clearTabStack(){
-    this._clearMap(this.tabStackMap as StackMap);
     if(this.stackMap.hasOwnProperty(STATE_START_KEY)){
-      this._delPageStackItem(this.stackMap, STATE_START_KEY, this.stackMap[STATE_START_KEY]);
+      const item = this.stackMap[STATE_START_KEY];
+      const _map = item.tabStackMap;
+      if(_map){
+        for(let k in _map){
+          if(_map.hasOwnProperty(k)){
+            let item = _map[k];
+            delete(_map[k]);
+            (this.onStackTabItemDel as OnStackItemSet)(item);
+          }
+        }
+        this._delPageStackItem(this.stackMap, STATE_START_KEY, this.stackMap[STATE_START_KEY]);
+      }
     }
   }
   clearStack(){
-    this._clearMap(this.stackMap);
-  }
-  _clearMap(_map: StackMap){
+    const _map = this.stackMap;
     let k;
     for(k in _map){
       if(_map.hasOwnProperty(k)){
@@ -231,23 +277,70 @@ class HistoryNav {
     }
   }
   setPageStackItem(stateKey: number, route: Route){
-    let item: StackItem = {
-      route,
-      stateKey,
-      isTab: false
-    }
-    if(stateKey === STATE_START_KEY){
-      const tabIndex = this.getTabIndex(route.trimedPath);
-      if(tabIndex !== undefined){
-        item.isTab = true;
-        item.tabIndex = tabIndex;
-        if(!(this.tabStackMap as StackMap).hasOwnProperty(tabIndex)){
-          (this.tabStackMap as StackMap)[tabIndex] = item;
+    if(this.isTabRoute(route.trimedPath)){
+      if(stateKey !== STATE_START_KEY){
+        throw new Error('tabRoute is stateKey is not ' + STATE_START_KEY);
+      }
+      const tabIndex = <number>this.getTabIndex(route.trimedPath);
+      let stackItem;
+      if(this.stackMap.hasOwnProperty(stateKey)){
+
+        stackItem = this.stackMap[stateKey];
+        stackItem.route = route;
+        stackItem.tabIndex = tabIndex;
+
+        if(!stackItem.isTab){
+          this._delPageStackItem(this.stackMap, stateKey, stackItem);
+          stackItem = null;
         }
       }
+      
+      if(!stackItem) { 
+        stackItem = this.stackMap[stateKey] = {
+          route,
+          stateKey,
+          isTab: true,
+          tabIndex,
+          tabStackMap: {}
+        }
+        this.onStackItemSet(stackItem);
+      }
+      const map = <StackMap>stackItem.tabStackMap;
+      if(map.hasOwnProperty(tabIndex)){
+        // throw new Error('Already has stackItem');
+        (this.onStackTabItemActivated as OnStackItemSet)(map[tabIndex]);
+        // console.log('_delTabPageStackItem', tabIndex);
+        // this._delPageStackItem(map, tabIndex, map[tabIndex]);
+      } else {
+        const tabStackItem = map[tabIndex] = {
+          route,
+          stateKey,
+          isTab: true,
+          tabIndex,
+          stackItem
+        };
+        (this.onStackTabItemSet as OnStackItemSet)(tabStackItem);
+      }
+    } else {
+
+      
+      if(this.stackMap.hasOwnProperty(stateKey)){
+        let item = this.stackMap[stateKey];
+        if(item.isTab){
+          this._clearAll();
+        } else {
+          this._delPageStackItem(this.stackMap, stateKey, item);
+        }
+      }
+
+      const item = this.stackMap[stateKey] = {
+        route,
+        stateKey,
+        isTab: false
+      }
+
+      this.onStackItemSet(item);
     }
-    this.stackMap[stateKey] = item;
-    this.onStackItemSet(item);
   }
   // _clearAfter(){
   //   const key = getCurrentStateKey();
@@ -294,6 +387,8 @@ class HistoryNav {
       let _popPushKey = preKey + 1;
       h.replaceState({[KEY_NAME]: _popPushKey}, '');
       updatePreState();
+      const item = <StackItem>this.stackMap[preKey];
+      this.onStackItemDeactivated(item);
       this._replace(fullUrlParse(this.urlUtils.getUrlByLocation()), '_popPush');
       // this._setModalCrumbsWhenChange();
       return;
@@ -337,7 +432,9 @@ class HistoryNav {
     // this._whenPopTra = null;
   
     const route = fullUrlParse(this.urlUtils.getUrlByLocation());
-    if(!page){
+    if(page){
+      this.onStackItemActivated(page);
+    } else {
       this.setPageStackItem(currKey, route);
     }
     this._clearAfter();

@@ -5,7 +5,7 @@ import type { Config, TabBarList } from './src/vanilla/vanilla-type.d.ts';
 const pages = [
   {
     path: '/', meta: {title: '首页'}, 
-    component: (opt: StackItem, pageEl: HTMLElement, hNv: HistoryNavigation) => {
+    component: (pageEl: HTMLElement, hNv: HistoryNavigation, opt: StackItem) => {
 
       const el = document.createElement('h1');
       el.textContent = 'hello ' + opt.route.path + 'now: ' + Date.now();
@@ -23,7 +23,7 @@ const pages = [
       }
     }
   },
-  {path: '/list', meta: {title: '列表'}, component(opt: StackItem, pageEl: HTMLElement, hNv: HistoryNavigation){
+  {path: '/list', meta: {title: '列表'}, component(pageEl: HTMLElement, hNv: HistoryNavigation, opt: StackItem){
 
       const el = document.createElement('h1');
       el.textContent = 'hello ' + opt.route.path + 'now: ' + Date.now();
@@ -47,7 +47,7 @@ const pages = [
       }
     }
   },
-  {path: '/detail', meta: {title: '详情'}, component(opt: StackItem, pageEl: HTMLElement, hNv: HistoryNavigation){
+  {path: '/detail', meta: {title: '详情'}, component(pageEl: HTMLElement, hNv: HistoryNavigation, opt: StackItem){
       const el = document.createElement('h1');
       el.textContent = 'Detail ' + opt.route.path + 'now: ' + Date.now();
       const btn = document.createElement('button');
@@ -70,7 +70,7 @@ const pages = [
       }
     }
   },
-  {path: '/me', meta: {title: '我'}, component(opt: StackItem, pageEl: HTMLElement, hNv: HistoryNavigation){
+  {path: '/me', meta: {title: '我'}, component(pageEl: HTMLElement, hNv: HistoryNavigation, opt: StackItem){
 
       const el = document.createElement('h1');
       el.textContent = 'Me ' + opt.route.path + 'now: ' + Date.now();
@@ -96,9 +96,20 @@ const Tabbar = (list, ) => {
 
 const config: Config = {
   pages,
+  tabBar: {
+    list: [
+      {path: '/', title: '首页'},
+      {path: '/list', title: '列表'},
+      {path: '/me', title: '我'}
+    ]
+  },
   onRouted(_route, page){
     document.title = page.meta.title;
-  }
+  },
+  // notFoundPage: {
+  //   meta: {title: '404'},
+  //   compo
+  // },
   // tabBar: {
   //   list: [],
   //   component: 

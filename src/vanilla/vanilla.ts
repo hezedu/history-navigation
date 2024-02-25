@@ -1,28 +1,73 @@
 import HistoryNav from '../lib/history';
 import type { StackItem, HistoryNavigation } from '../lib/history-navigation';
-import { _formatPages, noop } from './util';
-import type { PageHashMap, Config } from './vanilla-type';
+import { _formatPages, formatTabBarList } from './util';
+import type { PageHashMap, Config, Component, TabBar, ComponentResult, TabBarList, TabBarComponent, TabBarComponentResult } from './vanilla-type';
 
 const defNotFoundPage = {
-  onCreate: () => {
-    const el = document.createElement('h1');
-    el.textContent = '404 NotFound';
-    return el;
-  },
-  onBeforeDestory:  () => {},
-  activated:  () => {},
-  deactivated:  () => {},
+  meta: {title: '404'},
+  component: () => {
+      const el = document.createElement('h1');
+      el.textContent = '404 NotFound';
+      return el;
+    }
 }
 
-function getPageCmpt(pageMap: PageHashMap, trimedPath: string){
+const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
+
+  const div = document.createElement('div');
+  Object.assign(div.style, {
+    height: '50px',
+    position: 'absolute',
+    width: '100%',
+    left: 0,
+    bottom: 0,
+    background: '#ccc',
+    display: 'flex',
+    justifyContent: 'space-between'
+  })
+  list.forEach(item => {
+    const btn = document.createElement('button');
+    btn.textContent = item.title;
+    btn.addEventListener('click', () => {
+      hNv.switchTab(item.path);
+    });
+    div.append(btn);
+  });
+  let preItem: HTMLElement;
+  return {
+    dom: div,
+    onSwitch(tabIndex: number){
+      if(preItem){
+        preItem.style.backgroundColor = '';
+        preItem.style.color = '';
+      }
+      preItem = (div.children[tabIndex] as HTMLElement);
+      preItem.style.backgroundColor = 'blue';
+      preItem.style.color = '#fff';
+    }
+  };
+}
+
+function getPage(pageMap: PageHashMap, trimedPath: string){
   if(pageMap.hasOwnProperty(trimedPath)){
-    return pageMap[trimedPath].component;
+    return pageMap[trimedPath];
   }
   return defNotFoundPage;
 }
 export default function Main(config: Config) {
   const container = genContainer();
   const pageMap = _formatPages(config.pages);
+  
+  const tabBar = config.tabBar;
+  let tabs; 
+  let tabSet;
+  let tabCmptResult: TabBarComponentResult;
+  if(tabBar){
+    tabSet = formatTabBarList(tabBar.list, pageMap);
+    tabs = tabBar.list.map(v => {
+      return v.path;
+    });
+  }
   Object.assign(container.style, {
     height: '100%',
     width: '100%',
@@ -33,32 +78,124 @@ export default function Main(config: Config) {
   const hNv = new HistoryNav({
     isHashMode: config.isHashMode,
     base: config.base,
+    tabs,
     onStackItemSet(item: StackItem) {
-      const pageContainer = genPageWrap(item.stateKey);
-      const pageCmpt = getPageCmpt(pageMap, item.route.trimedPath);
-      item.cmpt = pageCmpt(item, pageContainer, hNv);
-      item.pageContainer = pageContainer;
+      // if(item.isTab){
+      //   if(!item.pageContainer){
+      //     item.pageContainer = genPageWrap(item);
+      //     item.pageContainer.append(tabCmptResult.dom);
+      //     container.append(item.pageContainer);
+      //   }
+      //   const pageConfig = getPage(pageMap, item.route.trimedPath);
+      //   item.tabPageEl = genTabPageContainer();
+      //   item.cmpt = pageConfig.component(item.tabPageEl, hNv, item);
+      //   item.pageContainer.append(item.tabPageEl);
+        
+      // } else {
+
+      // }
+
+
+
       // pageContainer.append(page);
+      
+      const pageContainer = genPageWrap(item);
+      const pageConfig = getPage(pageMap, item.route.trimedPath);
+      item.pageConfig = pageConfig;
+      item.pageContainer = pageContainer;
+      if(item.isTab){
+        pageContainer.append(tabCmptResult.dom);
+      } else {
+        item.cmpt = pageConfig.component(pageContainer, hNv, item);
+      }
       container.append(pageContainer);
     },
+
+    onStackItemDel(item: StackItem){
+      cmptBeforeDestory(item.cmpt);
+      item.pageContainer.remove();
+      
+    },
+    onStackItemActivated(item: StackItem){
+      item.pageContainer.hidden = false;
+      console.log('onStackItemActivated');
+    },
+    onStackItemDeactivated(item: StackItem){
+      item.pageContainer.hidden = true;
+      console.log('onStackItemDeactivated');
+    },
+
+    onStackTabItemSet(item: StackItem){
+      const stackItem = item.stackItem as StackItem;
+      const pageContainer = genTabPageContainer(item);
+      const pageConfig = getPage(pageMap, item.route.trimedPath);
+      item.pageConfig = pageConfig;
+      item.pageContainer = pageContainer;
+      item.cmpt = pageConfig.component(pageContainer, hNv, item);
+      stackItem.pageContainer.append(item.pageContainer);
+    },
+    onStackTabItemDel(item: StackItem){
+      cmptBeforeDestory(item.cmpt);
+      item.pageContainer.remove();
+    },
+    onStackTabItemActivated(item: StackItem){
+      item.pageContainer.hidden = false;
+      console.log('onStackTabItemActivated');
+    },
+    onStackTabItemDeactivated(item: StackItem){
+      item.pageContainer.hidden = true;
+      console.log('onStackTabItemDeactivated');
+    },
+
     onRouted(arg){
       if(onRouted){
         const route = arg.route;
-        const page = pageMap[route.trimedPath];
-        onRouted(arg, page);
+        const pageConfig = pageMap[route.trimedPath];
+        if(pageConfig.isTab){
+          tabCmptResult.onSwitch(pageConfig.tabIndex as number);
+        }
+        onRouted(arg, pageConfig);
       }
     },
-    tabs: ['/', '/list', '/me'],
-    onStackItemDel(item: StackItem){
- 
-      item.cmpt.beforeDestory();
-      item.pageContainer.remove();
-    }
   })
+
+
+  if(tabBar){
+    let tabBarCmpt = tabBar.component || defTabBarCmpt;
+    tabCmptResult = tabBarCmpt(tabBar.list, hNv);
+  }
   hNv.load();
   return container;
 }
 
+function cmptBeforeDestory(cmptResult: ComponentResult){
+  if(cmptResult){
+    if(typeof cmptResult === 'function'){
+      cmptResult();
+    } else {
+      const d = cmptResult.beforeDestory;
+      if(d){
+        d();
+      }
+    }
+  }
+}
+
+function genTabPageContainer (item: StackItem){
+  const el = document.createElement('div');
+  Object.assign(el.style, {
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: '50px',
+    overflow: 'hidden',
+    position: 'absolute',
+    background: '#eee',
+    zIndex: item.tabIndex
+  });
+  el.dataset.myname = 'tabpage';
+  return el;
+}
 
 function genContainer (){
   const el = document.createElement('div');
@@ -71,10 +208,10 @@ function genContainer (){
   return el;
 }
 
-
-function genPageWrap (stateKey: number){
+function genPageWrap (item: StackItem){
+  const stateKey = item.stateKey;
   const el = document.createElement('div');
-  el.id = '_h_n_page_' + stateKey;
+  // el.id = '_h_n_page_' + stateKey;
   Object.assign(el.style, {
     top: 0,
     left: 0,
@@ -85,5 +222,7 @@ function genPageWrap (stateKey: number){
     zIndex: stateKey,
     background: '#fff'
   });
+  
+  el.dataset.myname = 'page';
   return el;
 }

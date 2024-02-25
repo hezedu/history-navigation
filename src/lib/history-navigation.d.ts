@@ -9,8 +9,10 @@ export type Tabs = Array<string>;
 type StackItem = {
   stateKey: number,
   route: Route,
+
   isTab: boolean,
   tabIndex?: number,
+  tabStackMap?: StackMap,
   [key: string]: any
 }
 export type StackMap = {
@@ -52,7 +54,13 @@ export type HistoryNavOpt = {
   tabs?: Tabs,
   onRouted: OnRouted,
   onStackItemSet: OnStackItemSet,
-  onStackItemDel: OnStackItemSet
+  onStackItemDel: OnStackItemSet,
+  onStackItemActivated: OnStackItemSet,
+  onStackItemDeactivated: OnStackItemSet,
+  onStackTabItemSet?: OnStackItemSet,
+  onStackTabItemDel?: OnStackItemSet,
+  onStackTabItemActivated?: OnStackItemSet,
+  onStackTabItemDeactivated?: OnStackItemSet,
 }
 
 
