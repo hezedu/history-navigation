@@ -1,4 +1,4 @@
-import type {  Route, ModalCrumbs, StackItem, StackMap,  HistoryState, WhenBackPopInfo, HistoryNavOpt, OnRouted, OnStackItemSet } from './history-navigation';
+import type {  Route, ModalCrumbs, StackItem, StackMap,  HistoryState, WhenBackPopInfo, HistoryNavOpt, OnRouted, OnStackItemSet, OnRoutedEvent } from './history-navigation.d';
 
 import { STATE_START_KEY,  KEY_NAME, getCurrentStateKey, getCurrState, getCurrModaKey, getPreState, updatePreState, genStateKey } from './state-key';
 import { formatTabs, getTotalSteps } from './util';
@@ -21,6 +21,8 @@ class HistoryNav {
   onStackItemDel: OnStackItemSet;
   onStackItemActivated: OnStackItemSet;
   onStackItemDeactivated: OnStackItemSet;
+
+
   onStackTabItemSet?: OnStackItemSet;
   onStackTabItemDel?: OnStackItemSet;
   onStackTabItemActivated?: OnStackItemSet;
@@ -28,6 +30,8 @@ class HistoryNav {
   onRouted: OnRouted;
   _handleWindowUnload: () => void;
   _handlePopstate: () => void;
+  currStackItem?: StackItem;
+  currTabStackItem?: StackItem;
   loaded = false;
   constructor(opts: HistoryNavOpt){
     if(isInit){
@@ -179,13 +183,14 @@ class HistoryNav {
       }
       
     }
-    this.setPageStackItem(key, route);
-    this.onRouted({
+    const routeE = {
       route,
       isPop: false,
       behavior,
       distance
-    });
+    }
+    this.setPageStackItem(key, routeE);
+    this.onRouted(routeE);
   }
 
   push(userUrl: UserUrl){
@@ -202,13 +207,14 @@ class HistoryNav {
     // this._setModalCrumbsWhenChange();
     h.pushState({[KEY_NAME]: key}, '', this.urlUtils.toLocationUrl(route.fullPath));
     updatePreState();
-    this.setPageStackItem(key, route);
-    this.onRouted({
+    const routeE = {
       route,
       behavior: 'push',
       distance: 1,
       isPop: false
-    });
+    }
+    this.setPageStackItem(key, routeE);
+    this.onRouted(routeE);
   }
   relaunch(userUrl: UserUrl){
     const route = fullUrlParse(userUrl);
@@ -270,13 +276,14 @@ class HistoryNav {
     delete(hashMap[stateKey]);
     this.onStackItemDel(item);
   }
-  delPageStackItem(hashMap: StackMap, stateKey: string | number){
-    const item = hashMap[stateKey];
-    if(item){
-      this._delPageStackItem(hashMap, stateKey, item);
-    }
-  }
-  setPageStackItem(stateKey: number, route: Route){
+  // delPageStackItem(hashMap: StackMap, stateKey: string | number){
+  //   const item = hashMap[stateKey];
+  //   if(item){
+  //     this._delPageStackItem(hashMap, stateKey, item);
+  //   }
+  // }
+  setPageStackItem(stateKey: number, routedEvent: OnRoutedEvent){
+    const route = routedEvent.route;
     if(this.isTabRoute(route.trimedPath)){
       if(stateKey !== STATE_START_KEY){
         throw new Error('tabRoute is stateKey is not ' + STATE_START_KEY);
@@ -306,7 +313,7 @@ class HistoryNav {
         this.onStackItemSet(stackItem);
       }
       const map = <StackMap>stackItem.tabStackMap;
-      if(map.hasOwnProperty(tabIndex)){
+      if(map.hasOwnProperty(tabIndex)){ 
         // throw new Error('Already has stackItem');
         (this.onStackTabItemActivated as OnStackItemSet)(map[tabIndex]);
         // console.log('_delTabPageStackItem', tabIndex);
@@ -407,8 +414,8 @@ class HistoryNav {
     const currState = getCurrState();
     const currKey = currState.key;
   
-    const page = this.stackMap[currKey];
-    if(!page && currState.modalKey){
+    const stackItem = this.stackMap[currKey];
+    if(!stackItem && currState.modalKey){
       this.back(currState.modalKey);
       return;
     }
@@ -432,18 +439,19 @@ class HistoryNav {
     // this._whenPopTra = null;
   
     const route = fullUrlParse(this.urlUtils.getUrlByLocation());
-    if(page){
-      this.onStackItemActivated(page);
-    } else {
-      this.setPageStackItem(currKey, route);
-    }
-    this._clearAfter();
-    this.onRouted({
+    const routeE = {
       route,
       behavior: 'back',
       distance: compare,
       isPop: true
-    });
+    }
+    if(stackItem){
+      this.onStackItemActivated(stackItem);
+    } else {
+      this.setPageStackItem(currKey, routeE);
+    }
+    this._clearAfter();
+    this.onRouted(routeE);
 
   }
   destroy(){

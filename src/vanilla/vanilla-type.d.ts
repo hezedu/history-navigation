@@ -7,22 +7,7 @@ type CmptReturn = {
 }
 type ComponentResult = void | BeforeDestory | CmptReturn;
 type Component = (el: HTMLElement, hNv: HistoryNavigation, item: StackItem) => ComponentResult;
-type Page = {
-  path: string,
-  component: Component,
-  meta?: PageMeta,
-  className?: string
-}
 
-type PageItem = Page & {
-  trimedPath: string,
-  isTab: boolean,
-  tabIndex?: number
-}
-
-export type PageHashMap = {
-  [key: string]: PageItem
-}
 
 export type Pages = Array<Page>;
 
@@ -39,10 +24,43 @@ export type TabBar = {
   component?: TabBarComponent
 };
 
+type TransitionCss = {
+  [P in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[P];
+};
+type TransitionFn = () => TransitionCss;
+type PageTransition = {
+  type: 'transition' | 'animation',
+  beforeEnter: TransitionFn,
+  enter: TransitionFn,
+  leave: TransitionFn
+
+  // entered: TransitionFn,
+  // leave: TransitionFn,
+  // left: TransitionFn
+}
+
+type Page = {
+  path: string,
+  component: Component,
+  meta?: PageMeta,
+  className?: string,
+  transition?: TransitionFn
+}
+
+type PageItem = Page & {
+  trimedPath: string,
+  isTab: boolean,
+  tabIndex?: number
+}
+
+export type PageHashMap = {
+  [key: string]: PageItem
+}
 export type Config = {
   isHashMode?: boolean,
   base?: string,
   pageBg?: string,
+  pageTransition?: PageTransition,
   pageClassName?: string,
   pages: Pages,
   notFoundPage?: Component,

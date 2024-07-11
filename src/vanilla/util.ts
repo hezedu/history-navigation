@@ -1,8 +1,9 @@
 
-import type { Pages, PageHashMap, TabBarList} from './vanilla-type';
+import type { Pages, PageHashMap, TabBarList, Config} from './vanilla-type';
 import { trimSlash } from '../lib/url';
 export function noop() {};
-export function _formatPages(pages: Pages): PageHashMap{
+export function _formatPages(config : Config): PageHashMap{
+  const pages = config.pages;
   let map: PageHashMap = {};
   let i = 0, len = pages.length, page, tk;
   for(; i < len; i++){
@@ -14,7 +15,8 @@ export function _formatPages(pages: Pages): PageHashMap{
     map[tk] = Object.assign({
       trimedPath: tk,
       isTab: false,
-      cmptKey: i
+      cmptKey: i,
+      transition: config.pageTransition
     }, page);
   }
   return map;

@@ -90,9 +90,9 @@ const pages = [
   }
 ];
 
-const Tabbar = (list, ) => {
+// const Tabbar = (list, ) => {
 
-}
+// }
 
 const config: Config = {
   pages,
@@ -106,6 +106,40 @@ const config: Config = {
   onRouted(_route, page){
     document.title = page.meta.title;
   },
+  pageTransition: {
+    type: 'transition',
+    // deactivated(){
+    //   return {
+    //     left: '100%',
+    //   }
+    // },
+    // activated(){
+    //   return {
+    //     alignContent: 'center'
+    //   }
+    // },
+    beforeEnter(){
+      return {
+        left: '100%',
+      }
+    },
+    enter(){
+      return {
+        left: '0px'
+      }
+    },
+    leave(){
+      return {
+        left: '-100%'
+      }
+    }
+    // beforeDeactivate(){
+    //   return {
+    //     left: '-100%'
+    //   }
+    // },
+
+  }
   // notFoundPage: {
   //   meta: {title: '404'},
   //   compo

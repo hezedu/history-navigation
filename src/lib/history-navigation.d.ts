@@ -75,3 +75,12 @@ export type WhenBackPopInfo = {
   route: Route,
   behavior: string
 }
+
+
+// export type Tab = {
+//   map: Map<string, number>,
+//   onStackItemSet: OnStackItemSet;
+//   onStackItemDel: OnStackItemSet;
+//   onStackItemActivated: OnStackItemSet;
+//   onStackItemDeactivated: OnStackItemSet;
+// }

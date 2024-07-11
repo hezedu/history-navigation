@@ -1,14 +1,18 @@
 import HistoryNav from '../lib/history';
 import type { StackItem, HistoryNavigation } from '../lib/history-navigation';
 import { _formatPages, formatTabBarList } from './util';
-import type { PageHashMap, Config, Component, TabBar, ComponentResult, TabBarList, TabBarComponent, TabBarComponentResult } from './vanilla-type';
+import type { PageHashMap, Config, PageItem, Component, TabBar, ComponentResult, TabBarList, TabBarComponent, TabBarComponentResult } from './vanilla-type';
 
-const defNotFoundPage = {
+const defNotFoundPage: PageItem = {
+  path: '',
+  trimedPath: '',
+  isTab: false,
   meta: {title: '404'},
-  component: () => {
+
+  component: (pageEl) => {
       const el = document.createElement('h1');
       el.textContent = '404 NotFound';
-      return el;
+      pageEl.append(el);
     }
 }
 
@@ -37,6 +41,7 @@ const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
   return {
     dom: div,
     onSwitch(tabIndex: number){
+      console.log('onSwitch', tabIndex)
       if(preItem){
         preItem.style.backgroundColor = '';
         preItem.style.color = '';
@@ -48,7 +53,7 @@ const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
   };
 }
 
-function getPage(pageMap: PageHashMap, trimedPath: string){
+function getPage(pageMap: PageHashMap, trimedPath: string): PageItem{
   if(pageMap.hasOwnProperty(trimedPath)){
     return pageMap[trimedPath];
   }
@@ -56,17 +61,16 @@ function getPage(pageMap: PageHashMap, trimedPath: string){
 }
 export default function Main(config: Config) {
   const container = genContainer();
-  const pageMap = _formatPages(config.pages);
+  const pageMap = _formatPages(config);
   
   const tabBar = config.tabBar;
   let tabs; 
-  let tabSet;
   let tabCmptResult: TabBarComponentResult;
   if(tabBar){
-    tabSet = formatTabBarList(tabBar.list, pageMap);
     tabs = tabBar.list.map(v => {
       return v.path;
     });
+    formatTabBarList(tabBar.list, pageMap);
   }
   Object.assign(container.style, {
     height: '100%',
@@ -108,13 +112,14 @@ export default function Main(config: Config) {
       } else {
         item.cmpt = pageConfig.component(pageContainer, hNv, item);
       }
+      if(pageConfig.transition){
+
+      }
       container.append(pageContainer);
     },
-
     onStackItemDel(item: StackItem){
       cmptBeforeDestory(item.cmpt);
       item.pageContainer.remove();
-      
     },
     onStackItemActivated(item: StackItem){
       item.pageContainer.hidden = false;
@@ -151,6 +156,7 @@ export default function Main(config: Config) {
       if(onRouted){
         const route = arg.route;
         const pageConfig = pageMap[route.trimedPath];
+        console.log('onRouted', pageConfig)
         if(pageConfig.isTab){
           tabCmptResult.onSwitch(pageConfig.tabIndex as number);
         }
