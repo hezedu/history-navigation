@@ -16,8 +16,10 @@ type Mode = 'hash' | 'path' | {type: 'path', base: string };
 
 type ComponentReturn = void | BeforeDestory | ComponentReturns;
 type PageComponent = (el: HTMLElement, route: Route) => ComponentReturn;
+type Transition = () => void;
 type PageCommon = {
   bg: string,
+  transition: Transition
 }
 
 type Page = PageCommon & {
@@ -31,6 +33,6 @@ type Page = PageCommon & {
 type Config = {
   mode: Mode,
   pageCommon: PageCommon,
-  pages: [page],
+  pages: [Page],
   notFoundPageComponent: PageComponent
 } 

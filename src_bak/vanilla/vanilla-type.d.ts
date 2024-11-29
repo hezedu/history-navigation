@@ -1,4 +1,4 @@
-import type {HistoryNavigation} from '../lib/history-navigation';
+import type {HistoryNavigation,  } from '../lib/history-navigation';
 type BeforeDestory = () => void;
 type CmptReturn = {
   beforeDestory?: BeforeDestory,
@@ -6,17 +6,17 @@ type CmptReturn = {
   deactivated?: () => void,
 }
 type ComponentResult = void | BeforeDestory | CmptReturn;
-type Component = (pageEl: HTMLElement, hNv: HistoryNavigation, item: StackItem) => ComponentResult;
+type Component = (el: HTMLElement, hNv: HistoryNavigation, item: StackItem) => ComponentResult;
 
 
 export type Pages = Array<Page>;
 
 
-export type TabBarItem = { 
+export type TabBarItem = {
   path: string,
-  [key: string]: any 
+  [key: string]: any
 }
-export type TabBarList = Array<TabBarItem>; 
+export type TabBarList = Array<TabBarItem>;
 export type TabBarComponentResult = {dom: HTMLElement, onSwitch: (tabIndex: number) => void};
 export type TabBarComponent = (list: TabBarList, hNv: HistoryNavigation) => TabBarComponentResult;
 export type TabBar = {

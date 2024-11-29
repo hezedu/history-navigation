@@ -1,4 +1,4 @@
-import './style.css';
+
 import Main from './src/vanilla/vanilla.ts';
 import type { StackItem, HistoryNavigation } from './src/lib/history-navigation';
 import type { Config, TabBarList } from './src/vanilla/vanilla-type.d.ts';
@@ -152,4 +152,4 @@ const config: Config = {
 };
 
 (document.querySelector('#app') as HTMLElement)
-.replaceWith(Main(config));
+.append(Main(config));
