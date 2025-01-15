@@ -1,14 +1,13 @@
 import HistoryNav from '../lib/history';
 import type { StackItem, HistoryNavigation } from '../lib/history-navigation';
 import { _formatPages, formatTabBarList } from './util';
-import type { PageHashMap, Config, PageItem, Component, TabBar, ComponentResult, TabBarList, TabBarComponent, TabBarComponentResult } from './vanilla-type';
+import type {NotFoundPage,  PageHashMap, Config, PageItem,  ComponentResult, TabBarList, TabBarComponentResult } from './vanilla-type';
+import { Route } from '../lib/history-navigation';
 
-const defNotFoundPage: PageItem = {
-  path: '',
-  trimedPath: '',
-  isTab: false,
-  meta: {title: '404'},
-
+const defNotFoundPage: NotFoundPage = {
+  meta: {
+    title: '404'
+  },
   component: (pageEl) => {
       const el = document.createElement('h1');
       el.textContent = '404 NotFound';
@@ -17,7 +16,6 @@ const defNotFoundPage: PageItem = {
 }
 
 const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
-
   const div = document.createElement('div');
   Object.assign(div.style, {
     height: '50px',
@@ -28,7 +26,7 @@ const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
     background: '#ccc',
     display: 'flex',
     justifyContent: 'space-between'
-  })
+  });
   list.forEach(item => {
     const btn = document.createElement('button');
     btn.textContent = item.title;
@@ -37,32 +35,37 @@ const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
     });
     div.append(btn);
   });
-  let preItem: HTMLElement;
+  let _tmpItem: HTMLElement;
   return {
     dom: div,
     onSwitch(tabIndex: number){
-      console.log('onSwitch', tabIndex)
-      if(preItem){
-        preItem.style.backgroundColor = '';
-        preItem.style.color = '';
+      if(_tmpItem){
+        _tmpItem.style.backgroundColor = '';
+        _tmpItem.style.color = '';
       }
-      preItem = (div.children[tabIndex] as HTMLElement);
-      preItem.style.backgroundColor = 'blue';
-      preItem.style.color = '#fff';
+      _tmpItem = (div.children[tabIndex] as HTMLElement);
+      _tmpItem.style.backgroundColor = 'blue';
+      _tmpItem.style.color = '#fff';
     }
   };
 }
 
-function getPage(pageMap: PageHashMap, trimedPath: string): PageItem{
+function getPage(pageMap: PageHashMap, route: Route): PageItem {
+  const { trimedPath } = route;
   if(pageMap.hasOwnProperty(trimedPath)){
     return pageMap[trimedPath];
   }
-  return defNotFoundPage;
+  return Object.assign({
+    path: route.path,
+    trimedPath,
+    isTab: false,
+  }, defNotFoundPage);
 }
+
 export default function Main(config: Config) {
   const container = genContainer();
   const pageMap = _formatPages(config);
-  
+
   const tabBar = config.tabBar;
   let tabs; 
   let tabCmptResult: TabBarComponentResult;
@@ -72,39 +75,15 @@ export default function Main(config: Config) {
     });
     formatTabBarList(tabBar.list, pageMap);
   }
-  Object.assign(container.style, {
-    height: '100%',
-    width: '100%',
-    overflow: 'hidden',
-    position: 'relative'
-  });
+
   const onRouted = config.onRouted;
   const hNv = new HistoryNav({
     isHashMode: config.isHashMode,
     base: config.base,
     tabs,
     onStackItemSet(item: StackItem) {
-      // if(item.isTab){
-      //   if(!item.pageContainer){
-      //     item.pageContainer = genPageWrap(item);
-      //     item.pageContainer.append(tabCmptResult.dom);
-      //     container.append(item.pageContainer);
-      //   }
-      //   const pageConfig = getPage(pageMap, item.route.trimedPath);
-      //   item.tabPageEl = genTabPageContainer();
-      //   item.cmpt = pageConfig.component(item.tabPageEl, hNv, item);
-      //   item.pageContainer.append(item.tabPageEl);
-        
-      // } else {
-
-      // }
-
-
-
-      // pageContainer.append(page);
-      
       const pageContainer = genPageWrap(item);
-      const pageConfig = getPage(pageMap, item.route.trimedPath);
+      const pageConfig = getPage(pageMap, item.route);
       item.pageConfig = pageConfig;
       item.pageContainer = pageContainer;
       if(item.isTab){
@@ -130,10 +109,10 @@ export default function Main(config: Config) {
       console.log('onStackItemDeactivated');
     },
 
-    onStackTabItemSet(item: StackItem){
+    onStackTabItemSet(item){
       const stackItem = item.stackItem as StackItem;
       const pageContainer = genTabPageContainer(item);
-      const pageConfig = getPage(pageMap, item.route.trimedPath);
+      const pageConfig = getPage(pageMap, item.route);
       item.pageConfig = pageConfig;
       item.pageContainer = pageContainer;
       item.cmpt = pageConfig.component(pageContainer, hNv, item);
@@ -217,13 +196,12 @@ function genContainer (){
 function genPageWrap (item: StackItem){
   const stateKey = item.stateKey;
   const el = document.createElement('div');
-  // el.id = '_h_n_page_' + stateKey;
   Object.assign(el.style, {
     top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
-    overflow: 'hidden',
+    width: '100%',
+    height: '100%',
+    overflow: 'auto',
     position: 'absolute',
     zIndex: stateKey,
     background: '#fff'

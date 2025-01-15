@@ -53,6 +53,11 @@ type PageItem = Page & {
   tabIndex?: number
 }
 
+export type NotFoundPage = {
+  component: Component,
+  meta?: PageMeta
+}
+
 export type PageHashMap = {
   [key: string]: PageItem
 }

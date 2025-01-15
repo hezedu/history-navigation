@@ -5,15 +5,15 @@ export function noop() {};
 export function _formatPages(config : Config): PageHashMap{
   const pages = config.pages;
   let map: PageHashMap = {};
-  let i = 0, len = pages.length, page, tk;
+  let i = 0, len = pages.length, page, trimedKey;
   for(; i < len; i++){
     page = pages[i];
-    tk = trimSlash(page.path);
-    if(map.hasOwnProperty(tk)){
-      throw new Error(`pageMap key: ${tk} is same as ${page.path}`);
+    trimedKey = trimSlash(page.path);
+    if(map.hasOwnProperty(trimedKey)){
+      throw new Error(`pageMap key: ${trimedKey} is same as ${page.path}`);
     }
-    map[tk] = Object.assign({
-      trimedPath: tk,
+    map[trimedKey] = Object.assign({
+      trimedPath: trimedKey,
       isTab: false,
       cmptKey: i,
       transition: config.pageTransition

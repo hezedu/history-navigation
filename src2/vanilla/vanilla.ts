@@ -7,8 +7,9 @@ const defNotFoundPage: PageItem = {
   path: '',
   trimedPath: '',
   isTab: false,
-  meta: {title: '404'},
-
+  meta: {
+    title: '404'
+  },
   component: (pageEl) => {
       const el = document.createElement('h1');
       el.textContent = '404 NotFound';
@@ -53,7 +54,7 @@ const defTabBarCmpt = (list: TabBarList, hNv: HistoryNavigation) => {
   };
 }
 
-function getPage(pageMap: PageHashMap, trimedPath: string): PageItem{
+function getPage(pageMap: PageHashMap, trimedPath: string): PageItem {
   if(pageMap.hasOwnProperty(trimedPath)){
     return pageMap[trimedPath];
   }
