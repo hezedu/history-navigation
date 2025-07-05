@@ -1,0 +1,28 @@
+.h_n_container{
+  height: '100%';
+  width: '100%';
+  overflow: 'hidden';
+  position: 'relative';
+}
+.h_n_page, .h_n_tab_page {
+  background-color: #fff;
+}
+.h_n_page{
+  top: 0;
+  left: 0;
+  height: '100%';
+  width: '100%';
+  overflow: 'auto';
+  position: 'absolute';
+}
+.h_n_page_tab_container {
+  overflow: hidden;
+}
+.h_n_tab_page {
+  top: 0;
+  left: 0;
+  width: '100%';
+  height: calc(100% - 50px);
+  overflow: 'auto';
+  position: 'absolute';
+}

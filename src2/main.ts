@@ -1,7 +1,7 @@
 
-import Main from './src/vanilla/vanilla.ts';
-import type { StackItem, HistoryNavigation } from './src/lib/history-navigation';
-import type { Config, TabBarList } from './src/vanilla/vanilla-type.d.ts';
+import Main from './vanilla/vanilla.ts';
+import type { StackItem, HistoryNavigation } from './lib/history-navigation';
+import type { Config, TabBarList } from './vanilla/vanilla-type.d.ts';
 const pages = [
   {
     path: '/', meta: {title: '首页'}, 
